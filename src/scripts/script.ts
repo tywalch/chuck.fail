@@ -149,6 +149,11 @@ function createTallyMark() {
     interval: number;
   }
 
+  type DecrementTallyOptions = {
+    current: number;
+    interval: number;
+  }
+
   async function* incrementTally(options: TallyIntervalOptions) {
     const { max, interval } = options;
     for (let count = 0; count < max; count++) {
@@ -158,9 +163,9 @@ function createTallyMark() {
     }
   }
 
-  async function* decrementTally(options: TallyIntervalOptions) {
-    const { max, interval } = options;
-    for (let count = max - 1; count >= 0; count--) {
+  async function* decrementTally(options: DecrementTallyOptions) {
+    const { current, interval } = options;
+    for (let count = current - 1; count >= 0; count--) {
       const tally = (count % 5) - 1;
       yield { tally, count };
       await sleep(interval);
@@ -213,38 +218,28 @@ async function app({
   const display = tallyDisplay.init({
     max: totalDuration
   });
+
   const incrementOptions = {
     max: totalDuration, 
     interval: animation.delay / totalDuration
   };
-  
-  const decrementOptions = {
-    max: totalDuration,
-    interval: incrementOptions.interval / 2
-  }
 
   await sleep(animation.delay);
   
   for await (const { tally, count } of tallymark.incrementTally(incrementOptions)) {
-    // const group = groups[count];
-    display.set({count, tally});
-    // tallymark.applyTallyMark({ num: tally, group });
-    // totalDisplay.updateTotal(count);
+    display.set({ count, tally });
   }
   
   elements.resetButton?.addEventListener('click', async () => {
-    for await (const { tally, count } of tallymark.decrementTally(decrementOptions)) {
-      // const group = groups[count];
-      // tallymark.applyTallyMark({ num: tally, group });
-      // totalDisplay.updateTotal(count);
+    // const current = await vacationer.getDuration();
+    const current = totalDuration;
+    const interval = incrementOptions.interval / 2;
+    for await (const { tally, count } of tallymark.decrementTally({ current, interval })) {
       display.set({count, tally});
     }
 
     celebration.start();
     await sleep(9_000);
-
-    // totalDisplay.updateTotal(1);
-    // tallymark.applyTallyMark({ num: 1, group: groups[0] });
     display.set({count: 1, tally: 1});
     celebration.stop();
   });
