@@ -1,0 +1,33 @@
+{
+  "name": "chuck.fail",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "stage:img": "cp -r src/img dist",
+    "stage:markup": "cp src/*.html dist",
+    "stage:styles": "cp -r src/styles dist",
+    "stage": "npm run stage:img && npm run stage:markup && npm run stage:styles",
+    "compile:scripts": "tsc",
+    "compile": "npm run compile:scripts",
+    "serve": "cd ./dist && python -m SimpleHTTPServer 3001",
+    "start": "npm run build && npm run serve",
+    "build": "npm run clean && npm run stage && npm run compile",
+    "clean": "rm -rf dist && mkdir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tywalch/chuck.fail.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tywalch/chuck.fail/issues"
+  },
+  "homepage": "https://github.com/tywalch/chuck.fail#readme",
+  "dependencies": {
+    "core-js": "^3.27.1",
+    "typescript": "^4.9.4"
+  }
+}

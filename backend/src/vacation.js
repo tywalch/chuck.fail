@@ -24,8 +24,8 @@ const getEnv = (env) => {
     throw new Error(`Missing Environment Variable, ${env}`);
 };
 const configuration = {
-    table: getEnv("DYNAMODB_TABLE"),
     region: "us-east-1",
+    table: getEnv("DYNAMODB_TABLE"),
     accessKeyId: getEnv("DYNAMODB_ACCESS_KEY"),
     secretAccessKey: getEnv("DYNAMODB_SECRET"),
 };
@@ -77,9 +77,7 @@ function formatResponse(options) {
 }
 function getHandler() {
     return __awaiter(this, void 0, void 0, function* () {
-        const result = yield VacationDay.query.days({}).go({ order: 'desc' });
-        const [latest] = result.data;
-        return latest;
+        return VacationDay.query.days({}).go({ order: 'desc' });
     });
 }
 function postHandler() {
@@ -87,7 +85,7 @@ function postHandler() {
         yield VacationDay.put({}).go();
     });
 }
-const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
+const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log({ event });
         switch (event.httpMethod.toLowerCase()) {
