@@ -247,6 +247,10 @@ async function app({
   for await (const { tally, count } of tallymark.incrementTally(incrementOptions)) {
     tallyCounter.set({ count, tally });
   }
+
+  if (tallyCounter.get() === 0) {
+    celebration.start();
+  }
   
   elements.resetButton?.addEventListener('click', async () => {
     const current = tallyCounter.get();
@@ -256,9 +260,6 @@ async function app({
     }
 
     celebration.start();
-    await sleep(9_000);
-    tallyCounter.set({count: 1, tally: 1});
-    celebration.stop();
     await resetDuration();
   });
 }
