@@ -12,8 +12,10 @@
     "compile:scripts": "tsc",
     "compile": "npm run compile:scripts",
     "start:local": "cd ./dist && python -m SimpleHTTPServer 3001",
-    "start": "npm run build && npm run start:local",
-    "build": "npm run clean && npm run stage && npm run compile",
+    "start": "npm run build:frontend && npm run start:local",
+    "build:frontend": "npm run clean && npm run stage && npm run compile",
+    "build:backend": "cd ./netlify/functions && npm run build",
+    "build:ci": "npm run build:frontend && npm run build:backend",
     "clean": "rm -rf dist && mkdir dist"
   },
   "repository": {
