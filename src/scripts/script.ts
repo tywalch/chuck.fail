@@ -1,5 +1,3 @@
-import 'core-js/shim';
-
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
@@ -104,26 +102,26 @@ function applyTallyMark(options: ApplyTallyMarkOptions) {
   group.replaceChildren(tally);
 }
 
-type IncrementTallyOptions = {
+type TallyIntervalOptions = {
   max: number;
-  delay: number;
+  interval: number;
 }
 
-async function* incrementTally(options :IncrementTallyOptions) {
-  const { max, delay } = options;
+async function* incrementTally(options: TallyIntervalOptions) {
+  const { max, interval } = options;
   for (let count = 0; count < max; count++) {
     const tally = (count % 5) + 1;
     yield { tally, count };
-    await sleep(delay);
+    await sleep(interval);
   }
 }
 
-async function* decrementTally(options :IncrementTallyOptions) {
-  const { max, delay } = options;
+async function* decrementTally(options: TallyIntervalOptions) {
+  const { max, interval } = options;
   for (let count = max - 1; count >= 0; count--) {
     const tally = (count % 5) - 1;
     yield { tally, count };
-    await sleep(delay);
+    await sleep(interval);
   }
 }
 
@@ -136,16 +134,23 @@ type AppElements = {
 }
 
 type AppOptions = {
+  animation: {
+    delay: number;
+    duration: number;
+  }
   elements: AppElements;
 }
 
 async function app(options: AppOptions) {
-  const { elements } = options;
+  const { elements, animation } = options;
+  
+  const lastVacationDate = await getLastVacationDate();
+  const totalHours = getHoursSince({ 
+    since: lastVacationDate
+  });
 
-  const duration = 2000;
-  const since = await getLastVacationDate();
-  const totalHours = getHoursSince({ since });
-  const delay = calculateDelay({ duration, count: totalHours });
+  const interval = animation.delay / totalHours;
+
   const updateCount = (count: number) => {
     elements.counterDisplayHours.textContent = `${count} hrs`;
   }
@@ -154,15 +159,17 @@ async function app(options: AppOptions) {
     max: totalHours, 
     container: elements.tallyContainer 
   });
-
-  for await (const { tally, count } of incrementTally({ max: totalHours, delay })) {
+  
+  await sleep(animation.delay);
+  
+  for await (const { tally, count } of incrementTally({ max: totalHours, interval })) {
     const group = groups[count];
     applyTallyMark({ num: tally, group });
     updateCount(count);
   }
   
   elements.reset?.addEventListener('click', async () => {
-    for await (const { tally, count } of decrementTally({ max: totalHours, delay })) {
+    for await (const { tally, count } of decrementTally({ max: totalHours, interval })) {
       const group = groups[count];
       applyTallyMark({ num: tally, group });
       updateCount(count);
