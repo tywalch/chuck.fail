@@ -33,7 +33,12 @@ function getRandomColor(colors: string[]) {
   return colors[index];
 }
 
-const vacationEndpoint = `${window.location.href}.netlify/functions/vacation`;
+function getHost() {
+  return window.location.href.includes('localhost')
+  ? 'https://poetic-crisp-7531f4.netlify.app/'
+  : `https://${window.location.host}/`;
+}
+const vacationEndpoint = `${getHost()}.netlify/functions/vacation`;
 
 function getMostRecentVacationDatetime(): Promise<number> {
   return fetch(vacationEndpoint)
@@ -72,7 +77,11 @@ class VacationTracker implements DurationTracker {
 
   async getDuration() {
     const lastVacationDate = await this.fetchLastVacationDate();
-    return this.getHoursSince(lastVacationDate);
+    const hoursSince = this.getHoursSince(lastVacationDate);
+    if (hoursSince === 0) {
+      return 1;
+    }
+    return hoursSince;
   }
 
   async resetDuration() {
@@ -154,7 +163,9 @@ function createTallyMark() {
   function applyTallyMark(options: ApplyTallyMarkOptions) {
     const { num, group } = options;
     const tally = createTallyMarkElement({ num });
-    group.replaceChildren(tally);
+    if (tally) {
+      group.replaceChildren(tally);
+    }
   }
 
   type TallyIntervalOptions = {
@@ -240,7 +251,7 @@ async function app({
   elements.counterContainer.classList.add('rattle');
   await sleep(animation.delay);
   
-  if (tallyCounter.get() === 0) {
+  if (tallyCounter.get() === 1) {
     tallyCounter.set({ count: 1, tally: 1 });
   } else {
     for await (const { tally, count } of tallymark.incrementTally(incrementOptions)) {
@@ -266,7 +277,7 @@ function isAppElements(elements: any): elements is AppElements {
     elements.totalDisplay instanceof HTMLElement &&
     elements.resetButton instanceof HTMLButtonElement &&
     elements.confettiContainer instanceof HTMLElement &&
-    elements.counter instanceof HTMLButtonElement &&
+    elements.counter instanceof HTMLElement &&
     elements.counterContainer instanceof HTMLElement &&
     elements.appContainer instanceof HTMLElement;
 }
@@ -286,7 +297,16 @@ function getAppElements(): AppElements {
   if (isAppElements(elements)) {
     return elements;
   }
-
+  console.log({
+    tallyContainer: elements.tallyContainer instanceof HTMLElement,
+    totalContainer: elements.totalContainer instanceof HTMLElement,
+    totalDisplay: elements.totalDisplay instanceof HTMLElement,
+    resetButton: elements.resetButton instanceof HTMLButtonElement,
+    confettiContainer: elements.confettiContainer instanceof HTMLElement,
+    counter: elements.counter instanceof HTMLElement,
+    counterContainer: elements.counterContainer instanceof HTMLElement,
+    appContainer: elements.appContainer instanceof HTMLElement,
+  });
   throw new Error('Missing required elements');
 }
 
@@ -384,8 +404,6 @@ async function main() {
       delay: 1500, 
       duration: 2000,
     };
-
-
 
     await app({
       elements, 
