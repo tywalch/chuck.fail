@@ -236,12 +236,12 @@ async function app({
 
   await sleep(animation.delay);
   
-  for await (const { tally, count } of tallymark.incrementTally(incrementOptions)) {
-    tallyCounter.set({ count, tally });
-  }
-
   if (tallyCounter.get() === 0) {
-    celebration.start();
+    tallyCounter.set({ count: 1, tally: 1 });
+  } else {
+    for await (const { tally, count } of tallymark.incrementTally(incrementOptions)) {
+      tallyCounter.set({ count, tally });
+    }
   }
   
   elements.resetButton?.addEventListener('click', async () => {
