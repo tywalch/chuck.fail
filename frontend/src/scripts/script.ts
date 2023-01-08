@@ -72,7 +72,7 @@ class VacationTracker implements DurationTracker {
   private async fetchLastVacationDate() {
     const lastVacationDate = this.lastVacationDate ?? await getMostRecentVacationDatetime();
     this.lastVacationDate = lastVacationDate;
-    return Date.now() - lastVacationDate;
+    return lastVacationDate;
   }
 
   async getDuration() {
