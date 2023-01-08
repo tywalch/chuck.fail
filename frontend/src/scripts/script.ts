@@ -39,10 +39,7 @@ function getMostRecentVacationDatetime(): Promise<number> {
   return fetch(vacationEndpoint)
       .then(resp => resp.json())
       .then(payload => {
-        if (payload.success) {
-          return payload.data.datetime;
-        }
-        throw new Error(`Failed to get latest vacation day: ${payload.message}`);
+        return payload.data.datetime ?? Date.now();
       })
       .catch(console.log);
 }
