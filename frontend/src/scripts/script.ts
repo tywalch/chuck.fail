@@ -59,14 +59,9 @@ class VacationTracker implements DurationTracker {
   private readonly HOUR = 1000 * 60 * 60;
   private lastVacationDate: number | undefined;
 
-  constructor() {
-
-  }
-
   private getHoursSince(since: number) {
     const now = Date.now();
-    this.lastVacationDate = Math.ceil(Math.max((now - since) / this.HOUR));
-    return this.lastVacationDate;
+    return Math.ceil(Math.max((now - since) / this.HOUR));
   }
 
   private async fetchLastVacationDate() {
