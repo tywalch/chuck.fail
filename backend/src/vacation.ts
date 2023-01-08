@@ -33,9 +33,9 @@ const VacationDay = new Entity({
     },
     attributes: {
         datetime: {
-            type: 'string',
+            type: 'number',
             readOnly: true,
-            default: () => moment().format(),
+            default: () => Date.now(),
         },
         metadata: {
             type: 'any',
@@ -66,7 +66,15 @@ function formatResponse<T>(options?: {data?: T, message?: string, statusCode?: n
   }
   
 async function getHandler() {
-    return VacationDay.query.days({}).go({order: 'desc'});
+    const result = await VacationDay.query.days({}).go({order: 'desc'});
+    const [ latest ] = result.data;
+    const now = Date.now();
+    if (!latest) {
+        await postHandler();
+    }
+    return {
+        datetime: latest?.datetime ?? now,
+    }
 }
 
 async function postHandler() {
