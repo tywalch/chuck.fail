@@ -203,6 +203,8 @@ type AppElements = {
   totalDisplay: HTMLHeadingElement
   confettiContainer: HTMLElement;
   resetButton: HTMLButtonElement;
+  counter: HTMLElement;
+  counterContainer: HTMLElement;
 }
 
 type AppAnimationOptions = {
@@ -234,6 +236,8 @@ async function app({
     interval: animation.delay / initialDuration
   };
 
+  elements.counter.classList.add('slam');
+  elements.counterContainer.classList.add('rattle');
   await sleep(animation.delay);
   
   if (tallyCounter.get() === 0) {
@@ -262,6 +266,8 @@ function isAppElements(elements: any): elements is AppElements {
     elements.totalDisplay instanceof HTMLElement &&
     elements.resetButton instanceof HTMLButtonElement &&
     elements.confettiContainer instanceof HTMLElement &&
+    elements.counter instanceof HTMLButtonElement &&
+    elements.counterContainer instanceof HTMLElement &&
     elements.appContainer instanceof HTMLElement;
 }
 
@@ -273,6 +279,8 @@ function getAppElements(): AppElements {
     resetButton: document.getElementById('btn-reset'),
     confettiContainer: document.getElementsByClassName('confetti-container')[0],
     appContainer: document.getElementsByTagName('body')[0],
+    counter: document.getElementById('counter'),
+    counterContainer: document.getElementById('counter-container'),
   }
 
   if (isAppElements(elements)) {
@@ -376,6 +384,8 @@ async function main() {
       delay: 1500, 
       duration: 2000,
     };
+
+
 
     await app({
       elements, 
