@@ -1,6 +1,6 @@
 interface DurationTracker {
   getDuration(): Promise<number>;
-  resetDuration: () => Promise<void>;
+  resetDuration(): Promise<void>;
 }
 
 interface CelebrationAnimation {
@@ -8,21 +8,14 @@ interface CelebrationAnimation {
   stop: () => void;
 }
 
-type TallyCounterOptions = {
+type TallyTrackerOptions = {
   tally: number;
   count: number;
 }
 
-interface TallyCounter {
-  set(options: TallyCounterOptions): void;
-}
-
-type TallyDisplayOptions = {
-  max: number;
-}
-
-interface TallyDisplay {
-  init(options: TallyDisplayOptions): TallyCounter;
+interface TallyTracker {
+  get(): number;
+  set(options: TallyTrackerOptions): void;
 }
 
 type SetCountFn = (count: number) => void;
@@ -200,48 +193,45 @@ type AppAnimationOptions = {
 type AppOptions = {
   animation: AppAnimationOptions;
   elements: AppElements;
-  vacationer: DurationTracker;
   tallymark: TallyMarkGenerators;
   celebration: CelebrationAnimation;
-  tallyDisplay: TallyDisplay;
+  tallyCounter: TallyTracker;
+  initialDuration: number;
+  resetDuration: () => Promise<void>;
 }
 
 async function app({
   elements,
   animation,
   tallymark,
-  vacationer,
   celebration,
-  tallyDisplay,
+  tallyCounter,
+  resetDuration,
+  initialDuration,
 }: AppOptions) {  
-  const totalDuration = await vacationer.getDuration();
-  const display = tallyDisplay.init({
-    max: totalDuration
-  });
-
   const incrementOptions = {
-    max: totalDuration, 
-    interval: animation.delay / totalDuration
+    max: initialDuration, 
+    interval: animation.delay / initialDuration
   };
 
   await sleep(animation.delay);
   
   for await (const { tally, count } of tallymark.incrementTally(incrementOptions)) {
-    display.set({ count, tally });
+    tallyCounter.set({ count, tally });
   }
   
   elements.resetButton?.addEventListener('click', async () => {
-    // const current = await vacationer.getDuration();
-    const current = totalDuration;
+    const current = tallyCounter.get();
     const interval = incrementOptions.interval / 2;
     for await (const { tally, count } of tallymark.decrementTally({ current, interval })) {
-      display.set({count, tally});
+      tallyCounter.set({count, tally});
     }
 
     celebration.start();
     await sleep(9_000);
-    display.set({count: 1, tally: 1});
+    tallyCounter.set({count: 1, tally: 1});
     celebration.stop();
+    await resetDuration();
   });
 }
 
@@ -279,7 +269,7 @@ type CreateSetCountFnOptions = {
   }
 }
 
-function createSetCountFn(options: CreateSetCountFnOptions): SetCountFn {
+function createSetDisplayCountFn(options: CreateSetCountFnOptions): SetCountFn {
   const { totalDisplay, colors } = options;
   return (count: number) => {
     totalDisplay.style.color = count > 0 
@@ -289,48 +279,29 @@ function createSetCountFn(options: CreateSetCountFnOptions): SetCountFn {
   }
 }
 
-type CreateTallyCounterOptions = {
+type CreateTallyTrackerOptions = {
   groups: HTMLElement[];
-  setDisplay: SetCountFn;
-  applyTallyMark: TallyMark['applyTallyMark'];
+  setDisplayTextCount: SetCountFn;
+  applyTallyMarkCount: TallyMark['applyTallyMark'];
 }
 
-function createTallyCounter(options: CreateTallyCounterOptions): TallyCounter {
-  const { applyTallyMark, setDisplay, groups } = options;
+function createTallyTracker(options: CreateTallyTrackerOptions): TallyTracker {
+  const { 
+    groups,
+    applyTallyMarkCount, 
+    setDisplayTextCount, 
+  } = options;
+  let current = 0;
   return {
     set({ count, tally }) {
+      current = count;
       const group = groups[count];
-      setDisplay(count);
-      applyTallyMark({ num: tally, group });
-    }
-  }
-}
-
-type CreateTallyDisplayOptions = {
-  container: HTMLElement;
-  tallymark: TallyMark;
-  setDisplay: SetCountFn;
-}
-
-function createTallyDisplay(options: CreateTallyDisplayOptions): TallyDisplay {
-  const { container, setDisplay, tallymark } = options;
-  const { applyTallyMark, prepareTallyGroups } = tallymark;
-  const groups: HTMLElement[] = [];
-  return {
-    init(options: TallyDisplayOptions) {
-      const { max } = options;
-      if (groups.length === 0) {
-        groups.push(
-          ...prepareTallyGroups({ container, max })
-        );
-      }
-
-      return createTallyCounter({
-        applyTallyMark,
-        setDisplay,
-        groups,
-      });
-    }
+      setDisplayTextCount(count);
+      applyTallyMarkCount({ num: tally, group });
+    },
+    get() {
+      return current;
+    },
   }
 }
 
@@ -352,26 +323,32 @@ async function main() {
         elements.resetButton.style.display = "none";
         elements.confettiContainer.style.display = "block";
         elements.appContainer.style.backgroundColor = colors.success;
-        console.log('Celebration started');
       },
       stop() {
         elements.confettiContainer.style.zIndex = "-1";
         elements.resetButton.style.display = "block";
         elements.confettiContainer.style.display = "none";
         elements.appContainer.style.backgroundColor = colors.background;
-        console.log('Celebration stopped');
       }
     }
 
-    const setDisplay = createSetCountFn({
+    const initialDuration = await vacationer.getDuration();
+    const resetDuration = () => vacationer.resetDuration();
+
+    const setDisplayCount = createSetDisplayCountFn({
       totalDisplay: elements.totalDisplay,
       colors,
     });
 
-    const tallyDisplay = createTallyDisplay({
+    const groups = tallymark.prepareTallyGroups({
       container: elements.tallyContainer,
-      tallymark: tallymark,
-      setDisplay,
+      max: initialDuration,
+    });
+
+    const tallyCounter = createTallyTracker({
+      applyTallyMarkCount: tallymark.applyTallyMark,
+      setDisplayTextCount: setDisplayCount,
+      groups,
     });
 
     const animation = {
@@ -383,9 +360,10 @@ async function main() {
       elements, 
       tallymark,
       animation,
-      vacationer,
       celebration,
-      tallyDisplay,
+      tallyCounter,
+      resetDuration,
+      initialDuration,
     });
 
   } catch (err) {
