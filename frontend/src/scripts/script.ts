@@ -33,12 +33,37 @@ function getRandomColor(colors: string[]) {
   return colors[index];
 }
 
+const vacationEndpoint = `${window.location.href}.netlify/functions/vacation`;
+
+function getMostRecentVacationDatetime(): Promise<number> {
+  return fetch(vacationEndpoint)
+      .then(resp => resp.json())
+      .then(payload => {
+        if (payload.success) {
+          return payload.data.datetime;
+        }
+        throw new Error(`Failed to get latest vacation day: ${payload.message}`);
+      })
+      .catch(console.log);
+}
+
+async function resetRecentVacation() {
+  await fetch(vacationEndpoint, { method: 'POST' })
+    .then(resp => resp.json())
+    .then(payload => {
+      if (!payload.success) {
+        throw new Error(`Failed to get latest vacation day: ${payload.message}`);
+      }
+    })
+    .catch(console.log);
+}
+
 class VacationTracker implements DurationTracker {
   private readonly HOUR = 1000 * 60 * 60;
-  private lastVacationDate: number;
+  private lastVacationDate: number | undefined;
 
   constructor() {
-    this.lastVacationDate = (this.HOUR * 73);
+
   }
 
   private getHoursSince(since: number) {
@@ -48,7 +73,9 @@ class VacationTracker implements DurationTracker {
   }
 
   private async fetchLastVacationDate() {
-    return Date.now() - this.lastVacationDate;
+    const lastVacationDate = this.lastVacationDate ?? await getMostRecentVacationDatetime();
+    this.lastVacationDate = lastVacationDate;
+    return Date.now() - lastVacationDate;
   }
 
   async getDuration() {
@@ -57,6 +84,7 @@ class VacationTracker implements DurationTracker {
   }
 
   async resetDuration() {
+    await resetRecentVacation();
     this.lastVacationDate = Date.now();
   }
 }
