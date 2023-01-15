@@ -19,7 +19,7 @@ export async function getMostRecentVacationDatetime(): Promise<number> {
       })
       .catch(err => {
         console.log('error getting more recent vacation time', err);
-        return getHoursAgo(120);
+        return getHoursAgo(65);
       })
       .then((previous) => getDistance(previous, Date.now()));
 }
