@@ -1,0 +1,14 @@
+.tally {
+  height: 8vh;
+  pointer-events: none;
+}
+
+.tallyGroup {
+  transition: visibility 0s, opacity 0.5s linear;
+}
+
+@media (max-width: 970px) {
+  .tally {
+    height: 6vh;
+  }
+}

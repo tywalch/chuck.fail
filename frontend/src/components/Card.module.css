@@ -1,0 +1,208 @@
+p {
+  font-size: 1rem;
+}
+
+.card {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 2fr 3fr .5fr 2fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.cardTitle {  
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.cardBody {  
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+.cardFooter {
+  grid-area: 4 / 1 / 5 / 2;
+}
+
+.cardFooter {
+  padding-top: 1rem;
+  padding-bottom: 0;
+}
+
+.cardCenter {
+  position: fixed;
+
+  top: 50%;
+  left: 50%;
+
+  width:24rem;
+  margin-left: -12rem;
+  
+  height:26rem;
+  margin-top: -13rem;
+}
+
+.countDisplay {
+  color: #f2f2f2;
+  box-shadow: #000000;
+  padding: 1em 1em;
+  border-radius: 4px;
+}
+
+.countHeader {
+  border-width: 1px 1px 0px 1px;
+  border-style: solid;
+  text-align: justify;
+  background-color: #111111fa;
+  padding: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.countHeader > p {
+  margin: 0;
+  padding: 0;
+}
+
+.countHeader > h1 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.7em
+}
+
+.countSuccess {
+  border-color: #111111fa;
+  /* background-color: #111111fa; */
+  /* background-color: #4caf50; */
+  /* color: #111111fa; */
+  transition: 1s;
+  transition-timing-function: ease-out;
+}
+
+.countFail {
+  /* background-color: #111111fa; */
+  border-color: #f44336;
+  color: #f2f2f2;
+}
+
+.countBody {
+  border-width: 0px 1px 1px 1px;
+  border-style: solid;
+  text-align: center;
+  color: #f2f2f2;
+  background-color: #111111fa;
+  font-size: large;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* background-color: #111111fa; */
+  padding: 1.5rem;
+  padding-top: 0;
+  padding-bottom: 1.5rem;
+}
+
+.countBodyHours {
+  font-size: 5rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+.countBodyDescription {
+  margin: 0;
+  padding: 0;
+  font-size: .8em;
+}
+
+.countAction {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: end;
+}
+
+.countActionButton {
+  width: 100%;
+  height: 3rem;
+  background: #f44336;
+  border-color: #f44336;
+  color: black;
+  font-family: 'Nunito', sans-serif;
+  text-transform: uppercase;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: .2s;
+}
+
+.countActionButton:hover {
+  background: #ea3528;
+  border-color: #ea3528;
+}
+
+.rattle {
+  animation: rattle 0.2s;
+  animation-delay: .5s;
+}
+
+.slam {
+  animation: slam .5s;
+  animation-timing-function: ease-in;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: .15s;
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes disapear {
+  0% {
+    opacity: 1;
+  }
+  
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes slam {
+  0% {
+    transform: scale(10, 10);
+    opacity: 0;
+  }
+  
+  40% {
+    opacity: 0;
+  }
+  
+  100% {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+}
+
+@keyframes rattle {
+  0% { top: 50%; left: 50%; }
+  10% { top: 49%; left: 50%; }
+  20% { top: 50%; left: 49%; }
+  30% { top: 51%; left: 50%; }
+  40% { top: 50%; left: 51%; }
+  50% { top: 48.5%; left: 50%; }
+  60% { top: 50%; left: 48.5%; }
+  70% { top: 50.5%; left: 50%; }
+  80% { top: 50%; left: 50.5%; }
+  90% { top: 49.5%; left: 50%; }
+  100% { top: 50%; left: 50%; }
+}

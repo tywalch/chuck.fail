@@ -1,0 +1,13 @@
+.tallyContainer {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
