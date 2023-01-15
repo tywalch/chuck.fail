@@ -7,6 +7,9 @@ function getHost() {
 const vacationEndpoint = `${getHost()}.netlify/functions/vacation`;
 
 const getHoursAgo = (num: number = 1) => Date.now() - (1000 * 60 * 60 * num);
+const getDistance = (previous: number, current: number) => {
+  return Math.max(Math.ceil((current - previous) / 1000 / 60 / 60), 0);
+}
 
 export async function getMostRecentVacationDatetime(): Promise<number> {
   return fetch(vacationEndpoint)
@@ -18,7 +21,7 @@ export async function getMostRecentVacationDatetime(): Promise<number> {
         console.log('error getting more recent vacation time', err);
         return getHoursAgo(30);
       })
-      .then((previous) => Math.ceil((Date.now() - previous) / 1000 / 60 / 60));
+      .then((previous) => getDistance(previous, Date.now()));
 }
 
 export async function resetRecentVacation() {
