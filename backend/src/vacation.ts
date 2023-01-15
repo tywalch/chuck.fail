@@ -50,15 +50,18 @@ async function getHandler(event: Event) {
         .go({order: 'desc'});
     
     const [ latest ] = result.data;
-    const now = Date.now();
 
     if (!latest) {
         await createNewVacationStart(request)
         .catch(err => console.error(err));
     }
 
+    const datetime = typeof latest?.datetime === 'string'
+        ? moment(latest.datetime).utc().valueOf()
+        : Date.now();
+
     return {
-        datetime: latest?.datetime ?? now,
+        datetime
     }
 }
 
@@ -75,7 +78,7 @@ async function authorizeEvent(event: Event): Promise<Authorization> {
             .go();
 
         const violations = getBlacklistViolations(event, blacklist.data);
-        
+
         return {
             authorized: violations.length === 0,
             violations,
