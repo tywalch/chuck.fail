@@ -5,10 +5,12 @@ import { COLOR } from './constants/color';
 import { TallyMark } from './components/Tally';
 import { Confetti } from './components/Confetti';
 import { getMostRecentVacationDatetime, resetRecentVacation } from './services/vacation';
+
 import styles from './App.module.css';
 
 const REVEAL_DURATION = 1500;
-
+const SMALLEST_REVEAL_DELAY = 15;
+const LARGEST_REVEAL_DELAY = 25;
 
 const App: Component = () => {
   const [ target, updateTarget ] = createResource(getMostRecentVacationDatetime);
@@ -16,7 +18,16 @@ const App: Component = () => {
   
   const celebrate = () => target() === 0;
   const celebrationStarted = () => count() === 0 && celebrate();
-  const revealDelay = () => Math.ceil(REVEAL_DURATION / (target() ?? 1));
+  const revealDelay = () => {
+    return Math.min(Math.max(
+      SMALLEST_REVEAL_DELAY,
+      Math.ceil(REVEAL_DURATION / (target() ?? 1)),
+    ), LARGEST_REVEAL_DELAY);
+    // const t = target() ?? 1;
+    // return t < 5 
+    //   ? SMALLEST_REVEAL_DELAY
+    //   : Math.ceil(REVEAL_DURATION / (target() ?? 1));
+  };
   const showCard = () => {
     return celebrate() || (
       Math.abs(count() - (target() ?? 0)
