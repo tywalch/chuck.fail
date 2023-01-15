@@ -64,7 +64,7 @@ export function Card(props: CardProps) {
       <div classList={cardClassList()}>
         <div classList={cardHeaderClassList()}>
           <h1>Chuck.{celebrate() ? 'Success' : 'Fail'}</h1>
-          <p>Charlie is literally such a fuck up he can't even figure out how vacation days work. If you're so great at code why are you so scared of not coding?</p>
+          <p>Charlie is literally such a fuck up he can't even figure out how vacation days work. If you're so great at code, why are you so scared of not coding, Bro?</p>
         </div>  
         <div classList={cardBodyClassList()}>
           <h2 
